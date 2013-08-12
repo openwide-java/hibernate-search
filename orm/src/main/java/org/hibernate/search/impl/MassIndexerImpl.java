@@ -128,6 +128,7 @@ public class MassIndexerImpl implements MassIndexer {
 		return cleaned;
 	}
 
+	@Override
 	public MassIndexer typesToIndexInParallel(int numberOfThreads) {
 		if ( numberOfThreads < 1 ) {
 			throw new IllegalArgumentException( "numberOfThreads must be at least 1" );

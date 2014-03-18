@@ -33,19 +33,21 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
+import org.apache.lucene.analysis.core.StopFilterFactory;
+import org.apache.lucene.analysis.ngram.NGramFilterFactory;
+import org.apache.lucene.analysis.snowball.SnowballPorterFilterFactory;
+import org.apache.lucene.analysis.standard.StandardFilterFactory;
+import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
-import org.apache.lucene.analysis.ngram.NGramFilterFactory;
-import org.apache.lucene.analysis.snowball.SnowballPorterFilterFactory;
-import org.apache.lucene.analysis.standard.StandardFilterFactory;
-import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
-import org.apache.lucene.analysis.core.StopFilterFactory;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
+import org.apache.lucene.search.SortField.Type;
 import org.fest.assertions.Condition;
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
@@ -794,7 +796,72 @@ public class DSLTest extends SearchTestCase {
 			transaction.commit();
 		}
 	}
+	
+	public void testPlainText() {
+		Transaction transaction = fullTextSession.beginTransaction();
 
+		try {
+			QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity( Coffee.class ).get();
+
+			Query query = qb.text()
+					.onFields( "name", "summary", "description" )
+					.withAllTerms() // XXX gsmet: see comments in ConnectedPlainTextMatchingContext
+					.matching( "balanced arabica" )
+					.createQuery();
+			FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery( query, Coffee.class );
+			fullTextQuery.setSort( new Sort( new SortField( "name", Type.STRING ) ) );
+			List<Coffee> results = fullTextQuery.list();
+
+			String[] expected = new String[] { "Dulsão do Brasil", "Kazaar", "Livanto" };
+			compareResultsAndExpected( expected, results );
+
+			query = qb.text()
+					.onFields( "name", "summary", "description" )
+					.withAllTerms() // XXX gsmet: see comments in ConnectedPlainTextMatchingContext
+					.matching( "-balanced arabica" )
+					.createQuery();
+			fullTextQuery = fullTextSession.createFullTextQuery( query, Coffee.class );
+			fullTextQuery.setSort( new Sort( new SortField( "name", Type.STRING ) ) );
+			results = fullTextQuery.list();
+
+			expected = new String[] { "Volluto", "Bukeela ka Ethiopia" };
+			compareResultsAndExpected( expected, results );
+			
+			query = qb.text()
+					.onFields( "name", "summary", "description" )
+					.withAllTerms() // XXX gsmet: see comments in ConnectedPlainTextMatchingContext
+					.matching( "powerful \"fruity note\"" )
+					.createQuery();
+			fullTextQuery = fullTextSession.createFullTextQuery( query, Coffee.class );
+			fullTextQuery.setSort( new Sort( new SortField( "name", Type.STRING ) ) );
+			results = fullTextQuery.list();
+
+			expected = new String[] { "Ristretto" };
+			compareResultsAndExpected( expected, results );
+			
+			query = qb.text()
+					.onFields( "name", "summary", "description" )
+					.matching( "sweet robust" )
+					.createQuery();
+			fullTextQuery = fullTextSession.createFullTextQuery( query, Coffee.class );
+			fullTextQuery.setSort( new Sort( new SortField( "name", Type.STRING ) ) );
+			results = fullTextQuery.list();
+
+			expected = new String[] { "Roma", "Volluto", "Caramelito", "Dulsão do Brasil" };
+			compareResultsAndExpected( expected, results );
+		}
+		finally {
+			transaction.commit();
+		}
+	}
+	
+	private void compareResultsAndExpected(String[] expected, List<Coffee> results) {
+		assertThat( results ).hasSize( expected.length );
+		for (int i = 0 ; i < expected.length; i++) {
+			assertThat( results.get(i).getName() ).isEqualTo( expected[i] );
+		}
+	}
+	
 	public void testMoreLikeThis() {
 		boolean outputLogs = true;
 		Transaction transaction = fullTextSession.beginTransaction();

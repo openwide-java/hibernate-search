@@ -1,7 +1,7 @@
 /*
  * Hibernate, Relational Persistence for Idiomatic Java
  *
- * Copyright (c) 2010, Red Hat, Inc. and/or its affiliates or third-party contributors as
+ * Copyright (c) 2010-2014, Red Hat, Inc. and/or its affiliates or third-party contributors as
  * indicated by the @author tags or express copyright attribution
  * statements applied by the authors.  All third-party contributions are
  * distributed under license by Red Hat, Inc.
@@ -54,6 +54,13 @@ public interface QueryBuilder {
 	 * @return a {@code PhraseContext} instance for building the range query
 	 */
 	PhraseContext phrase();
+	
+	/**
+	 * Build a plain text query.
+	 * 
+	 * @return a {@code PlainTextContext} instance for building the plain text query
+	 */
+	PlainTextContext text();
 
 	/**
 	 * Start for building a boolean query.

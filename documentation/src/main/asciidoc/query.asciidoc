@@ -289,6 +289,41 @@ Query luceneQuery = mythQB.keyword()
 In the previous example, only field name is boosted to 5.
 
 
+===== Plain text queries
+
+Plain text queries use the Lucene SimpleQueryParser. The query text is parsed and it exposes more
+search features to the end user such as boolean operators and phrase queries.
+
+====
+[source, JAVA]
+----
+Query luceneQuery = mythQB
+    .text()
+    .onField("history")
+    .matching("(storm OR hurricane) AND \"falling branches\"")
+    .createQuery();
+----
+====
+
+By default a plain text query uses the OR operator if the operator is not explicitly defined.
+If you prefer using the AND operator as default, you can add the `defaultOperatorIsAnd` flag.
+The following query returns results containing storm AND tree.
+
+====
+[source, JAVA]
+----
+Query luceneQuery = mythQB
+    .text()
+    .onField("history")
+    .defaultOperatorIsAnd()
+    .matching("storm tree")
+    .createQuery();
+----
+====
+
+The syntax supported by the SimpleQueryParser includes the following operators: boolean (AND, OR, NOT),
+prefix, phrase, precedence, fuzzy and near operator for phrase queries.
+
 ===== Fuzzy queries
 
 To execute a fuzzy query (based on the Levenshtein distance algorithm), start like a `keyword` query

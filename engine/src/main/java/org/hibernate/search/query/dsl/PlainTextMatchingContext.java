@@ -11,12 +11,16 @@ package org.hibernate.search.query.dsl;
 * @author Emmanuel Bernard
 * @author Guillaume Smet
 */
-public interface PlainTextMatchingContext extends FieldCustomization<PlainTextMatchingContext> {
+public interface PlainTextMatchingContext extends PlainTextQueryDefinitionTermination {
 	/**
-	 * Value searched in the field or fields.
-	 * The value is passed to the field's analyzer.
+	 * Boost the field to a given value
+	 * Most of the time positive float:
+	 *  - lower than 1 to diminish the weight
+	 *  - higher than 1 to increase the weight
+	 *
+	 * Could be negative but not unless you understand what is going on (advanced)
 	 */
-	PlainTextTermination matching(String value);
+	PlainTextMatchingContext boostedTo(float boost);
 
 	/**
 	 * field / property the term query is executed on
@@ -26,6 +30,6 @@ public interface PlainTextMatchingContext extends FieldCustomization<PlainTextMa
 	/**
 	 * Search for all the terms specified in matching().
 	 */
-	PlainTextMatchingContext defaultOperatorIsAnd();
+	PlainTextQueryDefinitionTermination defaultOperatorIsAnd();
 
 }

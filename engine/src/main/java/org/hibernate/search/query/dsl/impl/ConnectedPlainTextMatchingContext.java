@@ -57,16 +57,4 @@ public class ConnectedPlainTextMatchingContext implements PlainTextMatchingConte
 		return this;
 	}
 
-	@Override
-	public PlainTextMatchingContext ignoreAnalyzer() {
-		// XXX gsmet: see if we allow to ignore the analyzer or not. It doesn't seem wise for plain text search.
-		throw new UnsupportedOperationException( "Not supported for now" );
-	}
-
-	@Override
-	public PlainTextMatchingContext ignoreFieldBridge() {
-		// XXX gsmet: can we find a way to support field bridge? I'm not so sure we can get something really working.
-		throw new UnsupportedOperationException( "Not supported for now" );
-	}
-
 }

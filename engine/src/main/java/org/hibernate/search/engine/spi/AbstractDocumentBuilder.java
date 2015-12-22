@@ -189,7 +189,7 @@ public abstract class AbstractDocumentBuilder<T> {
 			ContainedInRecursionContext recursionContext = updateContainedInRecursionContext( unproxiedInstance, containedInMetadata, currentRecursionContext );
 
 			if ( recursionContext.isTerminal() ) {
-				return;
+				continue;
 			}
 
 			Object value = ReflectionHelper.getMemberValue( unproxiedInstance, member );

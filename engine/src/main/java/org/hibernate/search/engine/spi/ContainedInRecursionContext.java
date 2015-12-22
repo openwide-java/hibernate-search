@@ -1,7 +1,7 @@
 /*
  * Hibernate, Relational Persistence for Idiomatic Java
  *
- * Copyright (c) 2011, Red Hat, Inc. and/or its affiliates or third-party contributors as
+ * Copyright (c) 2010, Red Hat, Inc. and/or its affiliates or third-party contributors as
  * indicated by the @author tags or express copyright attribution
  * statements applied by the authors.  All third-party contributions are
  * distributed under license by Red Hat, Inc.
@@ -23,39 +23,46 @@
  */
 package org.hibernate.search.engine.spi;
 
+import java.util.Set;
+
 /**
  * Used to check the constraints of depth when using {@link org.hibernate.search.annotations.IndexedEmbedded}
  * or {@link org.hibernate.search.annotations.ContainedIn} annotations.
  *
  * @author Davide D'Alto
+ * @author Yoann Rodiere
  */
-public class DepthValidator {
+public class ContainedInRecursionContext {
 
-	private final int maxDepth;
+	private int maxDepth;
 	private int depth;
 
-	public DepthValidator(int maxDepth) {
+	private Set<String> comprehensivePaths;
+
+	public ContainedInRecursionContext(int maxDepth, int depth, Set<String> comprehensivePaths) {
 		this.maxDepth = maxDepth;
+		this.depth = depth;
+		this.comprehensivePaths = comprehensivePaths;
+	}
+
+	public int getMaxDepth() {
+		return maxDepth;
 	}
 
 	public int getDepth() {
 		return depth;
 	}
 
-	public void increaseDepth() {
-		depth++;
+	public Set<String> getComprehensivePaths() {
+		return comprehensivePaths;
 	}
 
-	public boolean isMaxDepthReached() {
-		return depth > maxDepth;
-	}
-
-	public boolean isMaxDepthInfinite() {
-		return maxDepth == Integer.MAX_VALUE;
+	public boolean isTerminal() {
+		return depth > maxDepth || comprehensivePaths != null && comprehensivePaths.isEmpty();
 	}
 
 	@Override
 	public String toString() {
-		return "[maxDepth=" + maxDepth + ", level=" + depth + "]";
+		return "[maxDepth=" + maxDepth + ", level=" + depth + ", comprehensivePaths=" + comprehensivePaths + "]";
 	}
 }

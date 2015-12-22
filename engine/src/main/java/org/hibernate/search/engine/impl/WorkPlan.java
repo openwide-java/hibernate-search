@@ -40,7 +40,7 @@ import org.hibernate.search.backend.spi.WorkType;
 import org.hibernate.search.bridge.spi.ConversionContext;
 import org.hibernate.search.bridge.util.impl.ContextualExceptionBridgeHelper;
 import org.hibernate.search.engine.spi.AbstractDocumentBuilder;
-import org.hibernate.search.engine.spi.DepthValidator;
+import org.hibernate.search.engine.spi.ContainedInRecursionContext;
 import org.hibernate.search.engine.spi.DocumentBuilderContainedEntity;
 import org.hibernate.search.engine.spi.EntityIndexBinding;
 import org.hibernate.search.engine.spi.SearchFactoryImplementor;
@@ -149,11 +149,12 @@ public class WorkPlan {
 	 * Used for recursive processing of containedIn
 	 *
 	 * @param value the entity to be processed
+	 * @param context the validator for the depth constraints
 	 */
-	public <T> void recurseContainedIn(T value, DepthValidator depth) {
+	public <T> void recurseContainedIn(T value, ContainedInRecursionContext context) {
 		Class<T> entityClass = instanceInitializer.getClass( value );
 		PerClassWork classWork = getClassWork( entityClass );
-		classWork.recurseContainedIn( value, depth );
+		classWork.recurseContainedIn( value, context );
 	}
 
 	/**
@@ -302,7 +303,7 @@ public class WorkPlan {
 		 *
 		 * @param value the instance to be processed
 		 */
-		void recurseContainedIn(T value, DepthValidator depth) {
+		void recurseContainedIn(T value, ContainedInRecursionContext context) {
 			if ( documentBuilder.requiresProvidedId() ) {
 				log.containedInPointsToProvidedId( instanceInitializer.getClass( value ) );
 			}
@@ -341,14 +342,14 @@ public class WorkPlan {
 								throw new AssertionFailure( "Unknown action type: " + operation );
 						}
 						// recursion starts
-						documentBuilder.appendContainedInWorkForInstance( value, WorkPlan.this, depth );
+						documentBuilder.appendContainedInWorkForInstance( value, WorkPlan.this, context );
 					}
 					// else nothing to do as it's being processed already
 				}
 				else {
 					// this branch for @ContainedIn recursive work of non-indexed entities
 					// as they don't have an indexingId
-					documentBuilder.appendContainedInWorkForInstance( value, WorkPlan.this, depth );
+					documentBuilder.appendContainedInWorkForInstance( value, WorkPlan.this, context );
 				}
 			}
 		}

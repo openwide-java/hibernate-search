@@ -86,7 +86,7 @@ public class SocialPerson {
 	public Set<SocialPerson> getFriends() {
 		return friends;
 	}
-	
+
 	public void setFriends(Set<SocialPerson> friends) {
 		this.friends = friends;
 	}
@@ -96,7 +96,7 @@ public class SocialPerson {
 	public Set<SocialPerson> getFriendsReverse() {
 		return friendsReverse;
 	}
-	
+
 	public void setFriendsReverse(Set<SocialPerson> friendsReverse) {
 		this.friendsReverse = friendsReverse;
 	}

@@ -36,7 +36,6 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.search.FullTextQuery;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
-import org.hibernate.search.annotations.IndexedEmbedded;
 import org.hibernate.search.backend.LuceneWork;
 import org.hibernate.search.test.SearchTestCase;
 import org.hibernate.search.test.util.LeakingLuceneBackend;
@@ -53,11 +52,11 @@ public class RecursiveGraphIncludePathsTest extends SearchTestCase {
 	@TestForIssue(jiraKey = "HSEARCH-2074")
 	public void testCorrectDepthIndexedWithIncludePath() {
 		prepareSocialGraph();
-		
+
 		verifyMatchExistsWithName( "name", "Ross", 0L );
 		verifyMatchExistsWithName( "name", "Rachel", 5L );
 		verifyMatchExistsWithName( "name", "Gunter", 6L );
-		
+
 		verifyMatchExistsWithName( "friends.name", "Ross", 1L, 2L, 3L, 4L, 5L );
 		verifyMatchExistsWithName( "friends.name", "Rachel", 0L, 1L, 2L, 3L, 4L, 6L );
 		verifyNoMatchExists( "friends.name", "Gunter" );
@@ -80,7 +79,7 @@ public class RecursiveGraphIncludePathsTest extends SearchTestCase {
 		assertEquals( 1, countWorksDoneOnPerson( 3L ) );
 		assertEquals( 1, countWorksDoneOnPerson( 4L ) );
 		assertEquals( 1, countWorksDoneOnPerson( 5L ) );
-		
+
 		// 6L (Gunter) does not embed any field from 0L (Ross/Rossito)
 		// It should not be reindexed
 		assertEquals( 0, countWorksDoneOnPerson( 6L ) );
@@ -123,7 +122,7 @@ public class RecursiveGraphIncludePathsTest extends SearchTestCase {
 		}
 	}
 
-	void verifyMatchExistsWithName(String fieldName, String fieldValue, Long ... expectedIds) {
+	void verifyMatchExistsWithName(String fieldName, String fieldValue, Long... expectedIds) {
 		FullTextSession fullTextSession = Search.getFullTextSession( openSession() );
 		try {
 			Transaction transaction = fullTextSession.beginTransaction();
@@ -133,14 +132,14 @@ public class RecursiveGraphIncludePathsTest extends SearchTestCase {
 			assertEquals( expectedIds.length, resultSize );
 			@SuppressWarnings("unchecked")
 			List<SocialPerson> list = fullTextQuery.list();
-			
+
 			assertEquals( expectedIds.length, list.size() );
-			
-			List<Long> expectIdsList = Arrays.asList(expectedIds);
-			for (SocialPerson person : list) {
+
+			List<Long> expectIdsList = Arrays.asList( expectedIds );
+			for ( SocialPerson person : list ) {
 				assertTrue( expectIdsList.contains( person.getId() ) );
 			}
-			
+
 			transaction.commit();
 		}
 		finally {
@@ -158,25 +157,25 @@ public class RecursiveGraphIncludePathsTest extends SearchTestCase {
 		ps[3] = new SocialPerson( 3L, "Phoebe" );
 		ps[4] = new SocialPerson( 4L, "Monica" );
 		ps[5] = new SocialPerson( 5L, "Rachel" );
-		
+
 		ps[6] = new SocialPerson( 6L, "Gunter" );
-		
+
 		// Friends
-		for ( int i = 0 ; i < 6 ; i++ ) {
-			for ( int j = 0 ; j < 6 ; j++ ) {
+		for ( int i = 0; i < 6; i++ ) {
+			for ( int j = 0; j < 6; j++ ) {
 				if ( i != j ) {
-					ps[i].addFriends(ps[j]);
+					ps[i].addFriends( ps[j] );
 				}
 			}
 		}
 
 		// Lonely person
 		ps[6].addFriends( ps[5] );
-		
+
 		for ( int i = 0; i < ps.length; i++ ) {
 			session.save( ps[i] );
 		}
-		
+
 		transaction.commit();
 		session.close();
 		for ( int i = 1; i < ps.length; i++ ) {

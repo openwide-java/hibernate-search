@@ -1,3 +1,8 @@
+Discontinued
+============
+This repository is no longer actively maintained. Please take a look at the [original repo](https://github.com/hibernate/hibernate-search).
+
+
 # Hibernate Search
 
 *Version: 5.6.0-SNAPSHOT*
